@@ -1,23 +1,32 @@
-import logo from './logo.svg';
 import './App.css';
-
+import Sidebar from './Sidebar';
+import Feed from './Feed'
+import Widgets from './Widgets'
+import { Routes,Route,BrowserRouter } from 'react-router-dom';
+import Explore from './explore';
+import Profile from './profile';
+import Message from './message';
+import Login from './login';
+import { useEffect } from 'react';
+import axios from 'axios';
 function App() {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+   <Sidebar />
+      {/* Feed */}
+      <BrowserRouter>
+      <Routes>
+        <Route exact path="/" element={<Feed />} />
+   
+        <Route exact path="/profile" element={<Profile />} />
+        <Route exact path="/explore" element={<Explore />} />
+        <Route exact path="/message" element={<Message />} />
+        <Route exact path="/login" element={<Login />} />
+      </Routes>
+      </BrowserRouter>
+      {/* Widget */}
+        <Widgets />
     </div>
   );
 }
