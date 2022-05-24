@@ -14,6 +14,8 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import './Post.css'
 import { ObjectID } from 'bson';
 import { Delete } from '@material-ui/icons'
+import Login from './login'
+const user = localStorage.getItem('twittertoken')
 function Feed() {
     const [posts, setPosts] = useState([]);
     const[count,setCount] = useState(0)
@@ -22,7 +24,10 @@ function Feed() {
             setPosts(snapshot.docs.map(doc => doc.data()))
         }) */
         setInterval(()=>{
-            axios.get('http://localhost:5000/get').then(res => setPosts(res.data))
+            axios.get('http://localhost:5000/get').then(res =>
+            
+            setPosts(res.data))
+
         },5000)
         
     
@@ -41,16 +46,21 @@ function Feed() {
         axios.delete(`http://localhost:5000/delete/${data}`).then(res => console.log(res))
     }
     //console.log(posts)
-
+        let arr = [...posts].reverse();
     return (
+        
         <div className = "feed">
             <div className = "feed__header">
                 <h2>Home</h2>
             </div>
-
+            {user && 
             <TweetBox />
+                }
+                {!user &&
+                <Login />}
             <FlipMove>
-                {posts.map(post => (
+                
+                {arr.map(post => (
                        <div className = "post" >
              {/*    <Post 
                 key = {post.text}

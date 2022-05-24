@@ -4,17 +4,21 @@ import './TweetBox.css'
 
 import axios from 'axios'
 import jwtDecode from 'jwt-decode'
+
 const user = localStorage.getItem('twittertoken')
-//const decode = jwtDecode(user).username
+
 function TweetBox() {
     const [tweetMessage, setTweetMessage] = useState("");
     const [tweetImage, setTweetImage] = useState("");
 
     const sendTweet = e => {
+        if(user){
+            const decode = jwtDecode(user).username
+            
         e.preventDefault();
         axios.post('http://localhost:5000/register', {
-            displayName :user,
-            username: user,
+            displayName :decode,
+            username: decode,
             //verified: true,
             text: tweetMessage,
             image: tweetImage
@@ -26,6 +30,9 @@ function TweetBox() {
   
         setTweetMessage("")
         setTweetImage("")
+    }else{
+        alert("Please Login to Post Tweets")
+    }
     }
 
     return (

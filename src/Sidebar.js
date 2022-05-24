@@ -50,7 +50,9 @@ function Sidebar() {
             <a style={{textDecoration:"none"}} href='/explore'> <h2>Explore</h2>
           </a>
         </div>
-          
+        
+          {user &&
+          <div>
            <SidebarOption 
               Icon = {MailOutlineIcon}
               text = "Message" 
@@ -63,7 +65,8 @@ function Sidebar() {
               text = "Profile" 
                path ='/profile'
            />
-      
+           </div>
+          }
         { !user  && <Button variant = "outlined" onClick={setModalIsOpenToTrue} className = "sidebar__tweet">Login</Button>  }
         {user &&  <Button variant = "outlined"  onClick={logout} className = "sidebar__tweets">Logout</Button>}
         <Modal show={modalIsOpen} onHide={modalIsOpen}>

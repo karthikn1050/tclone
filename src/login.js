@@ -7,12 +7,12 @@ const Login = () => {
     const [password,setPassword]= useState('')
   function handleSocialLogin(e) {
     e.preventDefault();
-    localStorage.setItem('twittertoken' , login)
-/*     let body = JSON.stringify({ username:login, password:password })
+    
+     let body = JSON.stringify({ username:login, password:password })
     axios.post('http://localhost:5000/auth/login',{
       username:login,
       password:password
-    }).then(response =>localStorage.setItem("twittertoken", response.data.token)).catch(err => console.logh(err,"err")) */
+    }).then(response =>localStorage.setItem("twittertoken", response.data.token)).catch(err => alert(err)) 
     setTimeout(()=>{
       window.location.reload();
 
@@ -27,7 +27,7 @@ function handleInputChanges(event) {
   setPassword(event.target.value);
 }
   return (
-    <div className="">
+    <div className="" style={{width:"90%",marginLeft:"5%"}}>
       <div className=""> 
         <img
           src="https://pluspng.com/img-png/png-twitter-logo-twitter-in-png-2500.png"
@@ -39,7 +39,7 @@ function handleInputChanges(event) {
       <div className="">
         <form id="form" className="form" onSubmit={e => handleSocialLogin(e)}>
           <div className="FormControl">
-            <label htmlFor="email">username</label>
+            <label htmlFor="email">Username</label>
             <input name="email" id="email" className="Input" onChange={handleInputChange} />
           </div>
           <div className="FormControl">

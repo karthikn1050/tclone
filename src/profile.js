@@ -6,7 +6,7 @@ import FlipMove from 'react-flip-move'
 import { Avatar } from '@material-ui/core'
 import './Post.css'
 import './profile.css'
-//import jwtDecode from 'jwt-decode'
+import jwtDecode from 'jwt-decode'
 import { ICON_ARROWBACK, ICON_MARKDOWN, ICON_DATE, ICON_CLOSE, ICON_UPLOAD, ICON_NEWMSG } from './Icons'
 export default class Profile extends Component {
     constructor(){
@@ -18,14 +18,15 @@ export default class Profile extends Component {
     
     componentDidMount(){
        let user= localStorage.getItem('twittertoken')
-       // let decode= jwtDecode(user).username
+        let decode= jwtDecode(user).username
         //console.log(decode)
         axios.post('http://localhost:5000/getuser',{
-            username:user
+            username:decode
         }).then(res => this.setState({tweet: res.data})) 
     }
   render() {
-      const user = localStorage.getItem('twittertoken')
+    let users= localStorage.getItem('twittertoken')
+      const user = jwtDecode(users).username
       
     return (
         <div>
