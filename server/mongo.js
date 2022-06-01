@@ -7,14 +7,14 @@ const connect =mongoose.connect('mongodb://localhost:27017/', {
 }, err => err ? console.log(err) : 
     console.log('Connected to Mongo database'));
 
+
 // Schema for users of app
 const UserSchema = new mongoose.Schema({
     displayName: String,
     username:String,
     text: String,
     image:String,
-    like:String
-   
+    like:String  
 });
 const User = mongoose.model('users', UserSchema);
 User.createIndexes();
@@ -22,11 +22,11 @@ User.createIndexes();
 // For backend and express
 const express = require('express');
 const app = express();
-const server = require('http').createServer(app)
-const socketIo = require('socket.io')
-const { Conversation, Message } = require('./model/chat')
 const methodOverride = require('method-override') 
 const passport = require('passport')
+const ip = require('ip')
+
+const { Kafka, logLevel, CompressionTypes, Partitioners } = require('kafkajs')
 const cors = require("cors");
 console.log("App listen at port 5000");
 app.use(express.json());
@@ -36,37 +36,6 @@ app.use(express.urlencoded({ extended: false }))
 app.set('trust proxy', true)
 app.use(cors())
 app.use(methodOverride('_method'))
-const jwt = require('jsonwebtoken')
-const io = socketIo(server,{ 
-    cors: {
-      origin: 'http://localhost:3000'
-    }
-}) 
-io.use(function(socket, next){
-    console.log(socket.handshake.query.token)
-    if (socket.handshake.query && socket.handshake.query.token){
-      jwt.verify(socket.handshake.query.token, 'dhvani-twitter', function(err, decoded) {
-        if (err) return next(new Error('Authentication error'));
-        socket.decoded = decoded;
-        next();
-      });
-    }
-    else {
-      next(new Error('Authentication error'));
-    }    
-  })
-io.on('connection',(socket)=>{
-  console.log('client connected: ',socket.id)
-  
-  socket.join('clock-room')
-  
-  socket.on('disconnect',(reason)=>{
-    console.log(reason)
-  })
-})
-setInterval(()=>{
-     io.to('clock-room').emit('time', new Date())
-},1000)
 
 require('./passport');
 
@@ -74,11 +43,7 @@ app.use(passport.initialize())
 app.get("/", (req, resp) => {
 
     resp.send("App is Working");
-    // You can check backend is working or not by 
-    // entering http://loacalhost:5000
-    
-    // If you see App is working means
-    // backend working properly
+ 
 });
 
 var authRout = require('./routes/auth')
@@ -89,106 +54,162 @@ app.use('/auth', authRout)
 app.use('/tweet', tweetRout)
 app.use('/user', userRout)
 app.use('/chat', chatRout)
-app.post("/register", async (req, resp) => {
-   
-    const stud = new User({
+
+//consumer kafka
+
+
+// Schema for users of app
+const MessageSchema = new mongoose.Schema({
+  Message: String,
+ 
+ 
+},{timestamps: true},);
+const Mes = mongoose.model('message', MessageSchema);
+Mes.createIndexes();
+const host = process.env.HOST_IP || ip.address()
+
+const kafka = new Kafka({
+  logLevel: logLevel.INFO,
+  brokers: [`${host}:9092`],
+  clientId: 'example-consumer',
+})
+
+const topic = 'topic-test'
+const consumer = kafka.consumer({ groupId: 'test-group' })
+
+const run = async () => {
+  await consumer.connect()
+  await consumer.subscribe({ topic, fromBeginning: true })
+  await consumer.run({
+    // eachBatch: async ({ batch }) => {
+    //   console.log(batch)
+    // },
+    eachMessage: async ({ topic, partition, message}) => {
+      //const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
+     const arr =await JSON.parse(message.value)
+     console.log(arr.displayName)
+    /*   const stud = new Mes({
     
-        displayName: req.body.displayName,
-        username:req.body.username,
-        text: req.body.text,
-        image:req.body.image,
+        Message:arr.displayNames
+      
+      }); */
+      const stud = await new User({
+  
+        displayName:arr.displayName,
+        username:arr.username,
+        text: arr.text,
+        image:arr.image,
         like:0
-
     } 
-
+  
     );
+      
+     await stud.save().then(() => {console.log("One entry added")
+     console.log("One entry added")
+  })
     
-    stud.save().then(() => {resp.send("One entry added")
-    console.log("One entry added")
-});
-});
-//Socket io
+      console.log(`${message.value}`,JSON.parse(message.value))
+    //console.dir(message)
+    },
+  })
+}
 
-/* io.use((socket, next) => {
-    if (socket.handshake?.query?.token) {
-      jwt.verify(socket.handshake?.query?.token, 'dhvani-twitter', (err, decoded) => {
-        if (err) {
-          return next(new Error('Authentication error'));
-        }
-        socket.decoded = decoded;
-        next();
-      });
-    } else {
-      next(new Error('Authentication error'));
+run().catch(e => console.error(`[example/consumer] ${e.message}`, e))
+
+const errorTypes = ['unhandledRejection', 'uncaughtException']
+const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2']
+
+errorTypes.forEach(type => {
+  process.on(type, async e => {
+    try {
+      console.log(`process.on ${type}`)
+      console.error(e)
+      await consumer.disconnect()
+      process.exit(0)
+    } catch (_) {
+      process.exit(1)
     }
   })
-  .on('connection', (socket) => {
-    socket.on('message', (message) => {
-      io.emit('message', message);
-    });
-  });
+})
 
+signalTraps.forEach(type => {
+  process.once(type, async () => {
+    try {
+      await consumer.disconnect()
+    } finally {
+      process.kill(process.pid, type)
+    }
+  })
+})
+const kafkaP = new Kafka({
+    logLevel: logLevel.DEBUG,
+    brokers: [`${host}:9092`],
+    clientId: 'example-producer',
+  })
+  
+ // const topic = 'topic-test'
+  const producer = kafkaP.producer({
+      maxInFlightRequests:1,
+      idempotent: true,
+      createPartitioner:Partitioners.LegacyPartitioner
+  
+  })
+app.post("/postmessage",(req,res) =>{
+    try {
+      const sendMessage =  async() => { 
+  
+        
+      
+       
+          await producer
+            .send({
+              topic,
+              compression: CompressionTypes.GZIP,
+              messages: [
+                { value:JSON.stringify(
+                  {displayName: req.body.displayName,
+                    username:req.body.username,
+                    text: req.body.text,
+                    image:req.body.image,
+                    like:0
+                
+                }),key:"data" }
+              ],
+              acks:-1,
+            })
+            .then(console.log)
+            .catch(e => console.error(`[example/producer] ${e.message}`, e))
+          
+       
+        } 
+        const run = async () => {
+          await producer.connect()
+             sendMessage()
+        }
+        run().then(res.send("Message Sent")).catch(e => console.error(`[example/producer] ${e.message}`, e))
+    
+    } catch (error) {
+        console.log(error)
+    }
+})
+app.post("/register", async (req, resp) => {
+   
+  const stud = new User({
+  
+      displayName: req.body.displayName,
+      username:req.body.username,
+      text: req.body.text,
+      image:req.body.image,
+      like:0
 
- io.on("connection", socket =>{
-    socket.on('subscribe', room=>{
-        console.log('joining room', room)
-        socket.join(room)
-    })
+  } 
 
-    socket.on('leaveRoom', room=>{
-        console.log('leaving room', room)
-        socket.leave(room)
-    })
-
-    socket.on("chat", msg=>{
-        connect.then(async db=>{
-            try{
-                const findChat = await Conversation.find( { participants: { $all: [msg.id, socket.decoded.id] } } ).populate({path:'messages', populate:{path:'sender', select: 'username name'}})
-                if(findChat.length<1){
-                    console.log('new conversation')
-                    let firstmessage = {
-                        sender: socket.decoded.id,
-                        content: msg.content
-                    }
-                    let newMessage = await Message.create(firstmessage)
-                    let newConversation = await Conversation.create({participants:[msg.id, socket.decoded.id]})
-                    let user1 = await User.findById(socket.decoded.id)
-                    let user2 = await User.findById(msg.id)
-                    newConversation.messages.push(newMessage)
-                    newConversation.save((err, doc)=>{
-                        user1.conversations.unshift(newConversation)
-                        user1.save()
-                        user2.conversations.unshift(newConversation)
-                        user2.save()
-                        return socket.broadcast.to(msg.room).emit('output', doc.messages)
-                    })
-                }else if(findChat.length>0){
-                    let newMsg = {
-                        sender: socket.decoded.id,
-                        content: msg.content
-                    }
-                    io.in(msg.room).clients( async (err, clients)=>{
-                        if(clients.length<2){
-                          
-                        }
-                    })
-                    let addMsg = await Message.create(newMsg)
-                    findChat[0].messages.push(addMsg)
-                    let popMsg = await addMsg.populate('sender','name username').execPopulate()
-                    findChat[0].save((err, doc)=>{
-                        console.log(popMsg)
-                        return io.in(msg.room).emit('output', popMsg)
-                        // return io.emit('output', doc.messages)
-                    })
-                }else{
-                    return io.emit('error sending message')
-                }
-            }catch(error){
-                console.log(error)
-                return io.emit('output', 'Unknown server error')
-            }
-        })
-    })  */
+  );
+  
+  stud.save().then(() => {resp.send("One entry added")
+  console.log("One entry added")
+});
+});
 
 app.get("/get",(req,res) =>{
     User.find({}, (err, found) => {

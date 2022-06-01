@@ -1,28 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import './Feed.css'
 import TweetBox from './TweetBox'
-import Post from './Post'
-
 import FlipMove from 'react-flip-move'
 import axios from 'axios'
 import { Avatar } from '@material-ui/core'
-import  PublishIcon  from '@material-ui/icons/Publish'
-import  ChatBubbleOutlineIcon  from '@material-ui/icons/ChatBubbleOutline'
 import  VerifiedUserIcon  from '@material-ui/icons/VerifiedUser'
-import RepeatIcon from '@material-ui/icons/Repeat'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import './Post.css'
 import { ObjectID } from 'bson';
 import { Delete } from '@material-ui/icons'
 import Login from './login'
+import SidebarOption from './SidebarOption'
+import Home from '@material-ui/icons/Home'
 const user = localStorage.getItem('twittertoken')
 function Feed() {
     const [posts, setPosts] = useState([]);
     const[count,setCount] = useState(0)
     useEffect(() => {
-       /*  db.collection('posts').onSnapshot(snapshot =>{
-            setPosts(snapshot.docs.map(doc => doc.data()))
-        }) */
         setInterval(()=>{
             axios.get('http://localhost:5000/get').then(res =>
             
@@ -59,7 +53,7 @@ function Feed() {
                 {!user &&
                 <Login />}
             <FlipMove>
-                
+            
                 {arr.map(post => (
                        <div className = "post" >
              {/*    <Post 

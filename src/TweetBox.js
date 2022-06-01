@@ -16,7 +16,7 @@ function TweetBox() {
             const decode = jwtDecode(user).username
             
         e.preventDefault();
-        axios.post('http://localhost:5000/register', {
+        axios.post('http://localhost:5000/postmessage', {
             displayName :decode,
             username: decode,
             //verified: true,

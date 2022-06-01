@@ -17,6 +17,8 @@ import Login from './login'
 import Modal from "react-bootstrap/Modal";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './Sidebar.css'
+import Home from '@material-ui/icons/Home'
+import './SidebarOption.css'
 const user = localStorage.getItem('twittertoken')
 
 function Sidebar() {
@@ -38,20 +40,33 @@ function Sidebar() {
               className = "sidebar__twitterIcon"                
            />  */}
             <h3>iDiscover</h3>
-           <SidebarOption
-              Icon={HomeIcon}
-              text = "Home"  
-              path ='/'
-              active
-              
-           />
-            <div className = {`sidebarOption `}> 
-            <SearchIcon />
-            <a style={{textDecoration:"none"}} href='/explore'> <h2>Explore</h2>
+         
+           <div className = 'sidebarOption' style={{marginTop:"20px"}}> 
+            
+            <a style={{textDecoration:"none"}} href='/'> <h2> <HomeIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Home</h2>
           </a>
         </div>
+            <div className = 'sidebarOption'> 
+            
+            <a style={{textDecoration:"none"}} href='/explore'> <h2> <SearchIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Explore</h2>
+          </a>
+        </div>
+        {user &&
+        <div>
+        <div className = 'sidebarOption'> 
+            
+            <a style={{textDecoration:"none"}} href='/message'> <h2> <MailOutlineIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Message</h2>
+          </a>
+        </div>
+        <div className = 'sidebarOption'> 
+            
+            <a style={{textDecoration:"none"}} href='/profile'> <h2> <PermIdentityIcon style={{fontSize:"30px",margin:"1px 1px",marginBottom:"12px",marginTop:"7px"}} />Profile</h2>
+          </a>
+        </div>
+        </div>
+}
         
-          {user &&
+          {/* {user &&
           <div>
            <SidebarOption 
               Icon = {MailOutlineIcon}
@@ -66,7 +81,7 @@ function Sidebar() {
                path ='/profile'
            />
            </div>
-          }
+          } */}
         { !user  && <Button variant = "outlined" onClick={setModalIsOpenToTrue} className = "sidebar__tweet">Login</Button>  }
         {user &&  <Button variant = "outlined"  onClick={logout} className = "sidebar__tweets">Logout</Button>}
         <Modal show={modalIsOpen} onHide={modalIsOpen}>
