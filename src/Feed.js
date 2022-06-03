@@ -12,17 +12,18 @@ import { Delete } from '@material-ui/icons'
 import Login from './login'
 import SidebarOption from './SidebarOption'
 import Home from '@material-ui/icons/Home'
+import Widgets from './Widgets'
 const user = localStorage.getItem('twittertoken')
 function Feed() {
     const [posts, setPosts] = useState([]);
     const[count,setCount] = useState(0)
     useEffect(() => {
-        setInterval(()=>{
+       // setInterval(()=>{
             axios.get('http://localhost:5000/get').then(res =>
             
             setPosts(res.data))
 
-        },5000)
+       // },5000)
         
     
     }, [])
@@ -99,6 +100,7 @@ function Feed() {
         </div>
             ))}
             </FlipMove>   
+         
         </div>
     )
 }

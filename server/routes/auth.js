@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const passport = require('passport')
 const bcrypt = require('bcrypt');
 const User = require('../model/user')
-
+const {getAllUsers} = require('../controller/auth')
 router.post('/login', function(req,res){
     console.log(req.body)
     passport.authenticate('local',{session:false},(err,user,info)=>{
@@ -66,5 +66,7 @@ router.post('/register', function(req,res,next){
             res.status(500).json({success: false, msg: 'error getting account'})
         }
     })
+   
+      router.get("/allusers/:id", getAllUsers);
 
 module.exports = router

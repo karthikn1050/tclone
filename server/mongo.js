@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 var ObjectId = require('mongodb').ObjectID;
+const socket = require("socket.io");
+const messageRoutes = require('./routes/msgRoutes')
 const connect =mongoose.connect('mongodb://localhost:27017/', {
     dbName: 'twitter',
     useNewUrlParser: true,
@@ -28,7 +30,7 @@ const ip = require('ip')
 
 const { Kafka, logLevel, CompressionTypes, Partitioners } = require('kafkajs')
 const cors = require("cors");
-console.log("App listen at port 5000");
+
 app.use(express.json());
 app.use(cors());
 app.use(express.json())
@@ -48,12 +50,11 @@ app.get("/", (req, resp) => {
 
 var authRout = require('./routes/auth')
 var userRout = require('./routes/user')
-var chatRout = require('./routes/chat')
-var tweetRout = require('./routes/tweet')
+
 app.use('/auth', authRout)
-app.use('/tweet', tweetRout)
+app.use("/api/messages", messageRoutes);
 app.use('/user', userRout)
-app.use('/chat', chatRout)
+
 
 //consumer kafka
 
@@ -259,4 +260,28 @@ app.delete('/delete/:id', function(req, res){
         }
     });
  })
-app.listen(5000);
+ const server = app.listen(5000, () =>
+ console.log(`Server started on 5000`)
+);
+const io = socket(server, {
+ cors: {
+   origin: "http://localhost:3000",
+   credentials: true,
+ },
+});
+
+
+var onlineUsers = new Map()
+io.on("connection", (socket) => {
+ global.chatSocket = socket;
+ socket.on("add-user", (userId) => {
+   onlineUsers.set(userId, socket.id);
+ });
+
+ socket.on("send-msg", (data) => {
+   const sendUserSocket = onlineUsers.get(data.to);
+   if (sendUserSocket) {
+     socket.to(sendUserSocket).emit("msg-recieve", data.msg);
+   }
+ });
+});

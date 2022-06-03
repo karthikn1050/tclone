@@ -10,6 +10,7 @@ import Login from './login';
 import { useEffect } from 'react';
 import axios from 'axios';
 //import Sidebar from './sidebar/Sidebar';
+import Chatbox from './chatbox';
 function App() {
 
   return (
@@ -22,12 +23,12 @@ function App() {
    
         <Route exact path="/profile" element={<Profile />} />
         <Route exact path="/explore" element={<Explore />} />
-        <Route exact path="/message" element={<Message />} />
+        <Route exact path="/message" element={<Chatbox />} />
         <Route exact path="/login" element={<Login />} />
       </Routes>
       </BrowserRouter>
       {/* Widget */}
-        <Widgets />
+      {/*   <Widgets /> */}
     </div>
   );
 }
