@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 var ObjectId = require('mongodb').ObjectID;
 const socket = require("socket.io");
 const messageRoutes = require('./routes/msgRoutes')
+const Messages = require("./model/MessageModel");
 const connect =mongoose.connect('mongodb://localhost:27017/', {
     dbName: 'twitter',
     useNewUrlParser: true,
@@ -56,14 +57,14 @@ app.use("/api/messages", messageRoutes);
 app.use('/user', userRout)
 
 
+ 
+
 //consumer kafka
 
 
 // Schema for users of app
 const MessageSchema = new mongoose.Schema({
   Message: String,
- 
- 
 },{timestamps: true},);
 const Mes = mongoose.model('message', MessageSchema);
 Mes.createIndexes();
@@ -78,7 +79,7 @@ const kafka = new Kafka({
 const topic = 'topic-test'
 const consumer = kafka.consumer({ groupId: 'test-group' })
 
-const run = async () => {
+ const run = async () => {
   await consumer.connect()
   await consumer.subscribe({ topic, fromBeginning: true })
   await consumer.run({
@@ -89,26 +90,23 @@ const run = async () => {
       //const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
      const arr =await JSON.parse(message.value)
      console.log(arr.displayName)
-    /*   const stud = new Mes({
-    
-        Message:arr.displayNames
-      
-      }); */
-      const stud = await new User({
+
+ 
   
-        displayName:arr.displayName,
-        username:arr.username,
-        text: arr.text,
-        image:arr.image,
-        like:0
-    } 
+  const stud = await new User({
   
-    );
-      
+    displayName:arr.displayName,
+    username:arr.username,
+    text: arr.text,
+    image:arr.image,
+    like:0
+} 
+
+);
      await stud.save().then(() => {console.log("One entry added")
      console.log("One entry added")
   })
-    
+  
       console.log(`${message.value}`,JSON.parse(message.value))
     //console.dir(message)
     },
@@ -158,10 +156,6 @@ const kafkaP = new Kafka({
 app.post("/postmessage",(req,res) =>{
     try {
       const sendMessage =  async() => { 
-  
-        
-      
-       
           await producer
             .send({
               topic,
@@ -269,19 +263,85 @@ const io = socket(server, {
    credentials: true,
  },
 });
+const kafkaC = new Kafka({
+  logLevel: logLevel.INFO,
+  brokers: [`${host}:9092`],
+  clientId: 'examples-consumer',
+})
 
+const consumers = kafkaC.consumer({ groupId: 'chat-group' })
 
-var onlineUsers = new Map()
+global.onlineUsers = new Map();
 io.on("connection", (socket) => {
- global.chatSocket = socket;
- socket.on("add-user", (userId) => {
-   onlineUsers.set(userId, socket.id);
- });
+  global.chatSocket = socket;
+  socket.on("add-user", (userId) => {
+    global.onlineUsers.set(userId, socket.id);
+  });
 
- socket.on("send-msg", (data) => {
-   const sendUserSocket = onlineUsers.get(data.to);
-   if (sendUserSocket) {
-     socket.to(sendUserSocket).emit("msg-recieve", data.msg);
-   }
- });
+  socket.on("send-msg", (data) => {
+    console.log("socketdata",data.to)
+    const sendUserSocket = global.onlineUsers.get(data.to);
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit("msg-recieve", data.msg);
+    }
+  });
+/* 
+  socket.on("newdata", (data) => {
+  const MongoClient = require("mongodb").MongoClient;
+  MongoClient.connect("mongodb://localhost:27017/")
+    .then(client => {
+      console.log("Connected correctly to server");
+      // specify db and collections
+      const db = client.db("twitter");
+      const collection = db.collection("messages");
+      const changeStream = collection.watch();
+      // start listening to changes
+      changeStream.on("change", function(change) {
+        console.log(change);
+        socket.emit('the_change', change)
+       
+      });
+    })
+    .catch(err => {
+      console.error(err);
+  });
+}); */
+
+
 });
+
+
+
+
+let topics =["chat"]
+const runs = async () => {
+
+  await consumers.subscribe({ topics, fromBeginning: true })
+  await consumers.run({
+
+    eachMessage: async ({ topic, partition, message}) => {
+      //const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
+     const arr =await JSON.parse(message.value)
+
+
+      const stud = await new Messages(
+      {message: { text: arr.message.text },
+      users: [arr.users[0], arr.users[1]],
+      sender: arr.sender,
+    }
+  );
+      
+     await stud.save().then(() => {console.log("One entry added")
+   
+  })
+    //console.dir
+  },
+  })
+
+
+
+
+}
+
+runs().catch(e => console.error(`[example/consumer] ${e.message}`, e))
+  

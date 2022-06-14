@@ -16,11 +16,17 @@ export default function ChatContainer({ currentChat, socket }) {
     const data =  jwtDecode(
       localStorage.getItem('twittertoken')
     );
-    const response = axios.post('http://localhost:5000/api/messages/getmsg', {
-      from: data.id,
-      to: currentChat._id,
-    }).then(res=>{setMessages(res.data);});
+    if (currentChat) {
+    //  setInterval(()=>{
+        const response = axios.post('http://localhost:5000/api/messages/getmsg', {
+          from: data.id,
+          to: currentChat._id,
+        }).then(res=>{setMessages(res.data);});
+          console.log("get",messages)
+
+    //  },2000)
     
+  }
   }, [currentChat]);
  
   useEffect(() => {
@@ -60,8 +66,11 @@ export default function ChatContainer({ currentChat, socket }) {
         setArrivalMessage({ fromSelf: false, message: msg });
       });
     }
-  }, []); 
-
+  
+  }, [socket]); 
+  socket.current.on('the_change',(message)=>{
+    console.log(message)
+  })
   useEffect(() => {
     arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage]);

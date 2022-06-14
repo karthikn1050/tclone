@@ -8,6 +8,8 @@ import './Post.css'
 import './profile.css'
 import jwtDecode from 'jwt-decode'
 import { ICON_ARROWBACK, ICON_MARKDOWN, ICON_DATE, ICON_CLOSE, ICON_UPLOAD, ICON_NEWMSG } from './Icons'
+import Widgets from './Widgets'
+import Sidebar from './Sidebar'
 export default class Profile extends Component {
     constructor(){
         super()
@@ -29,8 +31,10 @@ export default class Profile extends Component {
       const user = jwtDecode(users).username
       
     return (
-        <div>
-
+        <div className='app'>
+            <div className=''>
+            <Sidebar />
+            </div>
             <div>
             <div className="profile-wrapper">
             <div className="profile-header-wrapper">
@@ -68,15 +72,6 @@ export default class Profile extends Component {
             <div className="profile-nav-menu">
                 <div key={'tweets'}  className={`profile-nav-item activeTab`  }>
                     Tweets
-                </div>
-                <div key={'replies'} className={`profile-nav-item ` }>
-                    Tweets & replies
-                </div>
-                <div key={'media'} className={`profile-nav-item ` }>
-                    Media
-                </div>
-                <div key={'likes'}  className={ `profile-nav-item ` }>
-                    Likes
                 </div>
             </div>
             <FlipMove>
@@ -119,7 +114,7 @@ export default class Profile extends Component {
             </div>
             
             </div>
-     
+     <Widgets />
     </div>
     )
   }

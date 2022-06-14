@@ -18,12 +18,15 @@ import Modal from "react-bootstrap/Modal";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './Sidebar.css'
 import Home from '@material-ui/icons/Home'
+import { useNavigate } from 'react-router-dom'
 import './SidebarOption.css'
 const user = localStorage.getItem('twittertoken')
+
 
 function Sidebar() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
+  const navigate = useNavigate()
     const setModalIsOpenToTrue =()=>{
         setModalIsOpen(true)
     }
@@ -32,7 +35,7 @@ function Sidebar() {
   } 
   const logout =()=>{
       localStorage.removeItem('twittertoken')
-      window.location.reload();
+      navigate('/')
   }
     return (
         <div className = "sidebar">
@@ -43,24 +46,24 @@ function Sidebar() {
          
            <div className = 'sidebarOption' style={{marginTop:"20px"}}> 
             
-            <a style={{textDecoration:"none"}} href='/'> <h2> <HomeIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Home</h2>
+            <a style={{textDecoration:"none"}} href='/idiscover'> <h2> <HomeIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Home</h2>
           </a>
         </div>
             <div className = 'sidebarOption'> 
             
-            <a style={{textDecoration:"none"}} href='/explore'> <h2> <SearchIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Explore</h2>
+            <a style={{textDecoration:"none"}} href='/idiscover/explore'> <h2> <SearchIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Explore</h2>
           </a>
         </div>
         {user &&
         <div>
         <div className = 'sidebarOption'> 
             
-            <a style={{textDecoration:"none"}} href='/message'> <h2> <MailOutlineIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Message</h2>
+            <a style={{textDecoration:"none"}} href='/idiscover/message'> <h2> <MailOutlineIcon style={{fontSize:"30px",margin:"1px 1px",marginTop:"7px",marginBottom:"12px"}} />Message</h2>
           </a>
         </div>
         <div className = 'sidebarOption'> 
             
-            <a style={{textDecoration:"none"}} href='/profile'> <h2> <PermIdentityIcon style={{fontSize:"30px",margin:"1px 1px",marginBottom:"12px",marginTop:"7px"}} />Profile</h2>
+            <a style={{textDecoration:"none"}} href='/idiscover/profile'> <h2> <PermIdentityIcon style={{fontSize:"30px",margin:"1px 1px",marginBottom:"12px",marginTop:"7px"}} />Profile</h2>
           </a>
         </div>
         </div>

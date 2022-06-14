@@ -1,0 +1,42 @@
+version: '3'
+services:
+  ui:
+    build: ./client
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+   
+    tty: true
+  zookeeper:
+    ports:
+      - '2181:2181'
+    image: jplock/zookeeper
+  kafka:
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENERS: 'INTERNAL://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_CREATE_TOPICS: 'test-topic:1:1,chat:1:1'
+      KAFKA_ADVERTISED_HOST_NAME: 172.17.0.1
+    image: 'wurstmeister/kafka:2.12-2.4.0'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+   
+  api:
+    build: ./server
+    ports:
+      - '5000:5000'
+    tty: true
+    stdin_open: true
+    depends_on:
+      - zookeeper
+      - kafka
+volumes: {}   

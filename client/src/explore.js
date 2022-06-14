@@ -2,7 +2,8 @@ import React, { useEffect, useState, useContext } from 'react'
 import Loader from './loader'
 import './explore.css'
 import { withRouter } from 'react-router-dom'
-
+import Sidebar from './Sidebar'
+import Widgets from './Widgets'
 
 
 const Explore = (props) => {
@@ -38,6 +39,8 @@ const Explore = (props) => {
     
 
     return(
+        <div className='app'>
+            <Sidebar />
         <div className="explore-wrapper">
             <h2>Explore</h2>
             <div className={trendOpen ? "explore-header header-border" : "explore-header"}>
@@ -92,6 +95,8 @@ const Explore = (props) => {
             </div> : <div>
          
             </div>}
+        </div>
+        <Widgets />
         </div>
     )
 }

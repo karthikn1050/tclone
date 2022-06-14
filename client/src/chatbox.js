@@ -8,6 +8,8 @@ import ChatContainer from "./chat/ChatContainer.jsx";
 import Contacts from "./chat/Contacts";
 import Welcome from "./chat/Welcome";
 import jwtDecode from "jwt-decode";
+import Sidebar from "./Sidebar.js";
+import Widgets from "./Widgets.js";
 export default function Chatbox() {
   const navigate = useNavigate();
   const socket = useRef();
@@ -18,7 +20,7 @@ export default function Chatbox() {
     const data =async()=>{
       console.log(jwtDecode(localStorage.getItem('twittertoken')))
     if (!localStorage.getItem('twittertoken')) {
-      navigate("/login");
+      navigate("/");
     } else {
       setCurrentUser(
         await jwtDecode(localStorage.getItem('twittertoken'))
@@ -39,12 +41,12 @@ data();
   useEffect(() => {
     if (currentUser) {
      
-      axios.get(`http://localhost:5000/auth/allusers/${currentUser.id}`).then(res =>{
+      axios.get(`http://localhost:5001/auth/allusers/${currentUser.id}`).then(res =>{
          setContacts(res.data)
      }); 
  }
   }, [currentUser]);
-   
+ 
  
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
@@ -52,7 +54,8 @@ data();
   };
  
   return (
-    <>
+    <div className="app">
+      <Sidebar />
       <Container>
         <div className="container">
           <Contacts contacts={contacts}  changeChat={handleChatChange} />
@@ -63,15 +66,17 @@ data();
           )}
         </div>
       </Container>
-    </>
+      <Widgets />
+    </div>
   );
 }
 
 const Container = styled.div`
   height: 100%;
-  width: 30%;
+  width: 50%;
   display: flex;
-  flex-direction: column;
+  flex:0.3;
+
   justify-content: center;
   gap: 1rem;
   align-items: center;

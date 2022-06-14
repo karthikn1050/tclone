@@ -52,7 +52,7 @@ export default function Contacts({ contacts, changeChat }) {
 }
 const Container = styled.div`
   display: grid;
- 
+  border-right:5px solid white;
   grid-template-rows: 10% 75% 15%;
   overflow: hidden;
   background-color:#dae1eb;

@@ -11,6 +11,7 @@ import { ObjectID } from 'bson';
 import { Delete } from '@material-ui/icons'
 import Login from './login'
 import SidebarOption from './SidebarOption'
+import Sidebar from './Sidebar'
 import Home from '@material-ui/icons/Home'
 import Widgets from './Widgets'
 const user = localStorage.getItem('twittertoken')
@@ -43,7 +44,8 @@ function Feed() {
     //console.log(posts)
         let arr = [...posts].reverse();
     return (
-        
+        <div className='app'>
+            <Sidebar />
         <div className = "feed">
             <div className = "feed__header">
                 <h2>Home</h2>
@@ -88,8 +90,10 @@ function Feed() {
                     </div>
                 </div>
                 <img 
+                 onError={e => e.target.style.display = 'none'}
                     src = {post.image}
                     alt = ""
+                    style={{width:"300px",height:"200px"}}
                 />
                 <div className = "post__footer">
                 
@@ -101,6 +105,8 @@ function Feed() {
             ))}
             </FlipMove>   
          
+        </div>
+        <Widgets />
         </div>
     )
 }
